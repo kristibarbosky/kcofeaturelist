@@ -151,7 +151,7 @@ function dbCommit ($dbconnection) {
 		return mysqli_commit($dbconnection);
 	}
 	elseif ($whichDB == POSTGRES) {
-		//return pg_co($dbconnection);
+		return true;
 	} 
 }
 
