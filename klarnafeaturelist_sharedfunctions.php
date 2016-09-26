@@ -2,7 +2,7 @@
 
 define('MYSQL', 'MYSQL'); 
 define('POSTGRES', 'POSTGRES'); 
-$whichDB = MYSQL;
+$whichDB = POSTGRES;
 
 class kcoModule {
 	private $module_name;
@@ -77,23 +77,6 @@ class kcoPlatform {
 function getDBconnection() {
 	global $whichDB;
 
-	// MySQL
-	$hostname="localhost";
-	$dbuser="kco_user";
-	$password="ksKXOEVRxG4R";
-	$dbname="kco_featurelist";
-
-	//connection to the database
-	$dbconnection = mysqli_connect($hostname, $dbuser, $password, $dbname);
-	if (!$dbconnection) {
-	    echo "Error: Unable to connect to MySQL." . PHP_EOL;
-	    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
-	    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
-	    exit;
-	}
-	$whichDB = MYSQL;
-/*
-
 	// Postgres
 	$whichDB = POSTGRES;
 	$conn_string = "host=mart1-prod-vz-db1.internal.machines port=5432 dbname=kco_featurelist user=sys.pg.kcofeatrlist password=2J%cbnheZu";
@@ -104,7 +87,7 @@ function getDBconnection() {
 		echo "Unable to connect to Postgres DB";
 		exit;
 	}
-*/
+
 	return $dbconnection;
 }
 
@@ -176,6 +159,7 @@ function doPlatforms($dbconnection, $selected_platform_id) {
 	$kcoPlatform = new kcoPlatform("", $selected_platform_id);
 	// get all platforms
 	$querystring = "SELECT name, id, type, comments FROM platform ORDER BY name ASC";
+	echo $querystring;
 	$platform_query = dbQuery($dbconnection, $querystring);
  
   	$selected_value = "";
@@ -370,7 +354,7 @@ function getAllowedCountriesForFeature ($dbconnection, $current_feature_id) {
 
 
 function printModuleFeatures($dbconnection, $selected_module_version_id, $update_allowed) {
-	$allFeaturesQueryString = "SELECT feature.id, feature.name, feature.comments, feature_type.type, feature_type.subtype, feature.order_state, feature.product_name from feature, feature_type WHERE feature_type.id=feature.type_id";
+	$allFeaturesQueryString = "SELECT feature.id, feature.name, feature.comments, feature_type.type, feature_type.subtype, feature.order_state, feature.product_name from feature, feature_type WHERE feature_type.id=feature.type_id ORDER BY feature_type.type, feature_type.subtype, feature.order_state, feature.name ASC";
 	$allFeaturesResult = dbQuery($dbconnection, $allFeaturesQueryString);
 
 	/*$querystring = "SELECT DISTINCT feature.product_name, feature.name, feature.id, feature_type.type, feature_type.subtype, feature.order_state, feature.comments FROM feature_type, feature, module_version_feature_countries WHERE feature_type.id=feature.type_id AND module_version_feature_countries.feature_id=feature.id AND module_version_feature_countries.module_version_id=\"" . $selected_module_version_id . "\" ORDER BY feature_type.type, feature_type.subtype, feature.order_state, feature.name ASC" ;
