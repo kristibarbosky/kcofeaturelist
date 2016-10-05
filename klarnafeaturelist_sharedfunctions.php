@@ -77,15 +77,34 @@ class kcoPlatform {
 function getDBconnection() {
 	global $whichDB;
 
-	// Postgres
-	$whichDB = POSTGRES;
-	$conn_string = "host=mart1-prod-vz-db1.internal.machines port=5432 dbname=kco_featurelist user=sys.pg.kcofeatrlist password=2J%cbnheZu";
+	echo "which DB = " . $whichDB;
 
-	$dbconnection = pg_connect($conn_string);
+	if ($whichDB == MYSQL) {
+		// MySQL
+		$hostname="localhost";
+		$dbuser="kco_user";
+		$password="ksKXOEVRxG4R";
+		$dbname="kco_featurelist";
 
-	if (!$dbconnection) {
-		echo "Unable to connect to Postgres DB";
-		exit;
+		//connection to the database
+		$dbconnection = mysqli_connect($hostname, $dbuser, $password, $dbname);
+		if (!$dbconnection) {
+		    echo "Error: Unable to connect to MySQL." . PHP_EOL;
+		    echo "Debugging errno: " . mysqli_connect_errno() . PHP_EOL;
+		    echo "Debugging error: " . mysqli_connect_error() . PHP_EOL;
+		    exit;
+		}
+	}
+	else {
+		// Postgres
+		$conn_string = "host=mart1-prod-vz-db1.internal.machines port=5432 dbname=kco_featurelist user=sys.pg.kcofeatrlist password=2J%cbnheZu";
+
+		$dbconnection = pg_connect($conn_string);
+
+		if (!$dbconnection) {
+			echo "Unable to connect to Postgres DB";
+			exit;
+		}
 	}
 
 	return $dbconnection;
@@ -153,13 +172,14 @@ function dbClose ($dbconnection) {
 
 
 function doPlatforms($dbconnection, $selected_platform_id) {
+	echo "<br><form action=\"klarnafeaturelist.php\" method=\"post\"><table id=\"platform_table\" class=\"mytable\">\n<tr><th>Platform</th><th>Type</th><th>URL</th><th>Comments</th></tr>";
+
 	echo "<tr><td style=\"width:30%\"><input type='hidden' name='which_field_changed' value='' />";
 	echo "\nSelect a platform <select onchange=\"this.form.which_field_changed.value=this.name;this.form.submit()\" name=\"platform_id\"><br>";
 
 	$kcoPlatform = new kcoPlatform("", $selected_platform_id);
 	// get all platforms
-	$querystring = "SELECT name, id, type, comments FROM platform ORDER BY name ASC";
-	echo $querystring;
+	$querystring = "SELECT name, id, type, comments, url FROM platform ORDER BY name ASC";
 	$platform_query = dbQuery($dbconnection, $querystring);
  
   	$selected_value = "";
@@ -167,6 +187,7 @@ function doPlatforms($dbconnection, $selected_platform_id) {
 	$selected_platform = "";
 	$platform_comments = "";
 	$platform_type = "";
+	$platform_url = "";
 	while($result = dbFetchArray($platform_query)) {
 	    $platform_name = $result['name'];
 	    $platform_id = $result['id'];
@@ -175,6 +196,10 @@ function doPlatforms($dbconnection, $selected_platform_id) {
 	    	$platform_type = $result['type'];
 	    	$platform_comments = $result['comments'];
 	    	$selected_platform = $platform_name;
+	    	$platform_url_from_db =  $result['url'];
+	    	if ($platform_url_from_db !== '') {
+	    		$platform_url = "<a href=\"" . $platform_url_from_db . "\">" . $platform_name . "</a>";
+	    	}
 	    	$kcoPlatform->setPlatformName($platform_name);
 	    }
 	    printf("\n<option value = \"%s\" %s >%s</option>", $platform_id, $selected_value, $platform_name);
@@ -186,7 +211,9 @@ function doPlatforms($dbconnection, $selected_platform_id) {
 
 	echo("</select></td><td style=\"width:10%\">");
 	printf("%s", $platform_type);
-	echo("</td><td style=\"width:70%\">");
+	echo("</td><td>");
+	printf("%s", $platform_url);
+	echo("</td><td style=\"width:70%\">");	
 	printf("%s", $platform_comments);
 	echo("</td></tr><br><br>");
 	
@@ -297,16 +324,16 @@ function printModuleVersions ($dbconnection, $selected_platform_version_id, $sel
 
 function printKlarnaResources($dbconnection, $selected_platform){
 	printf("Klarna Resources for <b>%s</b>:<br>", $selected_platform->getPlatformName());
-	$querystring = "SELECT person.* FROM platform_klarna_persons, person WHERE person.id=platform_klarna_persons.person_id AND platform_klarna_persons.platform_id=" . $selected_platform->getPlatformId();
+	$querystring = "SELECT person.* FROM platform_klarna_persons, person WHERE person.id=platform_klarna_persons.person_id AND platform_klarna_persons.platform_id=" . $selected_platform->getPlatformId() . " ORDER BY person.last_name";
 	$queryresult = dbQuery($dbconnection, $querystring);	
 	echo "\n\n<table id=\"klarna_resources_table\" class=\"mytable\">";
-	echo "\n<tr><th>First</th><th>Last</th><th>Title</th><th>Country</th></tr>";
+	echo "\n<tr><th>First</th><th>Last</th><th>Role</th><th>Email</th><th>Country</th></tr>";
 	$country = "";
 	while($result = dbFetchArray($queryresult)) {	
 		if (array_key_exists('country', $result)) {
 			$country = $result['country'];
 		}
-		printf("\n<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>", $result['first_name'], $result['last_name'], $result['title'], $country);
+		printf("\n<tr><td>%s</td><td>%s</td><td>%s</td><td><a href=\"mailto:%s\">%s</a></td><td>%s</td></tr>", $result['first_name'], $result['last_name'], $result['title'], $result['email'], $result['email'], $country);
 	}	
 	echo "</table></p>\n\n";
 }
@@ -326,7 +353,7 @@ function printSystemIntegrator($dbconnection, $selectedKcoModule){
 
 		if ($selected_si_id !== 0) {
 			// show system integrator contacts
-			$querystring = "SELECT person.* FROM system_integrator_persons, person WHERE person.id=system_integrator_persons.person_id AND system_integrator_persons.si_id=" . $selected_si_id;
+			$querystring = "SELECT person.* FROM system_integrator_persons, person WHERE person.id=system_integrator_persons.person_id AND system_integrator_persons.si_id=" . $selected_si_id . " ORDER BY person.last_name";
 			$queryresult = dbQuery($dbconnection, $querystring);	
 
 			if (dbNumRows($queryresult) > 0) {

@@ -432,7 +432,7 @@ if ($need_password) {
 }
 elseif (!$should_exit) {
 	$need_password = false;
-	echo "<table class=\"platformtable\">\n<tr><td style=\"width:30%\"><b>Platform</b></td><td style=\"width:10%\"><b>Type</b></td><td><b>Comments</b></td></tr>";
+	//echo "<table class=\"platformtable\">\n<tr><td style=\"width:30%\"><b>Platform</b></td><td style=\"width:10%\"><b>Type</b></td><td><b>Comments</b></td></tr>";
 	echo"<input type=\"hidden\" name=\"password_success\" value=\"password_success\"><br>\n";
 
 	$selected_platform = doPlatforms($dbconnection, $selected_platform_id);

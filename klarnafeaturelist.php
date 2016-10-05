@@ -81,8 +81,6 @@ if ($which_field_changed !== "module_version_id") {
 
 //echo "<br><form action=\"klarnafeaturelist.php\" method=\"post\"><table id=\"platform_table\" class=\"mytable\">\n<tr><td style=\"width:30%\"><b>Platform</b></td><td style=\"width:10%\"><b>Type</b></td><td><b>Comments</b></td></tr>";
 
-echo "<br><form action=\"klarnafeaturelist.php\" method=\"post\"><table id=\"platform_table\" class=\"mytable\">\n<tr><th>Platform</th><th>Type</th><th>Comments</th></tr>";
-
 $dbconnection = getDBconnection();
 
 $selected_platform = doPlatforms($dbconnection, $selected_platform_id);
@@ -118,7 +116,7 @@ else {
 	echo "</table></select><br><br></form>";
 }
 
-echo "For questions about Global Platforms and Plugins, contact <a href=\"mailto:melissa.thobe@klarna.com?Subject=KCO%20Feature%20List%Question\" target=\"_top\">Melissa Thobe</a>.  <br>For questions or issues with this application, contact <a href=\"mailto:kristi.barbosky@klarna.com?Subject=KCO%20Feature%20List%Question\" target=\"_top\">Kristi Barbosky</a>.";
+echo "\nFor questions about Global Platforms and Plugins, contact <a href=\"mailto:melissa.thobe@klarna.com?Subject=KCO%20Feature%20List%Question\" target=\"_top\">Melissa Thobe</a>.  <br>For questions or issues with this application, contact <a href=\"mailto:kristi.barbosky@klarna.com?Subject=KCO%20Feature%20List%Question\" target=\"_top\">Kristi Barbosky</a>.";
 ?>
 
 <script language="javascript" type="text/javascript">
