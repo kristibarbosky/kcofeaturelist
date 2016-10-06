@@ -77,8 +77,6 @@ class kcoPlatform {
 function getDBconnection() {
 	global $whichDB;
 
-	echo "which DB = " . $whichDB;
-
 	if ($whichDB == MYSQL) {
 		// MySQL
 		$hostname="localhost";
@@ -259,17 +257,20 @@ function doPlatformVersions ($dbconnection, $platform_version_query, $selected_p
 	while($result = dbFetchArray($platform_version_query)) {
 	    $platform_version = $result['version_number'];	
 	    $platform_version_id = $result['id'];	
+	    $release_date = $result['date_available'];	
+	    if ($type_of_integration == '') {
+	  	  $type_of_integration = $result['type_of_integration'];	 
+	  	}   
 
 	    if ($matching_platform_version_id == 0) {
 			$matching_platform_version_id = $platform_version_id;
 		}
 
-	    $release_date = $result['date_available'];
 	    if ($selected_platform_version_id == $platform_version_id) {
 	    	$selected_value = "selected";
 	    	$matching_platform_version_id = $selected_platform_version_id;
-	    	$type_of_integration = $platform_version_id = $result['type_of_integration'];	
-	    }
+	   		$type_of_integration = $result['type_of_integration'];	    	
+	    }  
 
 	    printf("\n<option value = \"%s\" %s >%s", $platform_version_id, $selected_value, $platform_version);
 	    if (!is_null($release_date)) {
